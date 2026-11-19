@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postduif</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%238fd5f7' stroke='%232a2438' stroke-width='4'/%3E%3Crect x='15' y='22' width='34' height='22' rx='3' fill='%23f7efd6' stroke='%232a2438' stroke-width='3'/%3E%3Cpath d='M15 25l17 12 17-12' fill='none' stroke='%232a2438' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --ink:#2a2438; --sh:#2a2438;
+    --paper:#f7efd6; --paper2:#d9c99a; --accent:#e8503a;
+    --bg1:#8fd5f7; --bg2:#e3f6ff; --dot:rgba(255,255,255,.45);
+    --out:#2a2438; --out2:#4d5a78; --pill:#fff6dc;
+    --orb:#ffd84a; --screen:#bfe3ff; --cloud:#ffffff; --cloudline:#c3d3ec; --win:#bfe3ff; --hill1:#aee3a6; --hill2:#88d184;
+    --font:"Comic Sans MS","Comic Sans","Chalkboard SE","Marker Felt","Comic Neue",cursive,sans-serif;
+    --serif:"Comic Sans MS","Comic Sans","Chalkboard SE","Marker Felt","Comic Neue",cursive,sans-serif;
+  }
+  [data-theme="night"]{
+    --sh:#0b0a1f;
+    --paper:#eadfbd; --paper2:#c5b68a; --accent:#ff7a59;
+    --bg1:#1b1a3b; --bg2:#35316e; --dot:rgba(255,255,255,.05);
+    --out:#f3eeff; --out2:#b8b2e0; --pill:#eadfbd;
+    --orb:#f4f1d0; --screen:#a9c9f7; --cloud:#3f3b86; --cloudline:#332f78; --win:#ffd978; --hill1:#2a4a78; --hill2:#203a66;
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:var(--font);color:var(--out);user-select:none;
+    background-image:linear-gradient(180deg,var(--bg1),var(--bg2));
+    transition:color .4s;
+  }
+
+  /* ---------- zon / maan en sterren ---------- */
+  .orb{position:fixed;left:5vw;top:80px;width:120px;height:120px;border-radius:50%;background:var(--orb);box-shadow:0 0 50px 14px rgba(255,216,74,.45);pointer-events:none;transition:background .4s,box-shadow .4s}
+  [data-theme="night"] .orb{background:radial-gradient(circle at 30% 35%,#dcd7ae 0 12px,transparent 13px),radial-gradient(circle at 64% 62%,#dcd7ae 0 16px,transparent 17px),radial-gradient(circle at 55% 22%,#dcd7ae 0 7px,transparent 8px),#f4f1d0;box-shadow:0 0 50px 12px rgba(244,241,208,.28)}
+  .stars{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;
+    background-image:radial-gradient(2px 2px at 12% 18%,#fff,transparent),radial-gradient(1.5px 1.5px at 28% 62%,#fff,transparent),
+    radial-gradient(2px 2px at 44% 12%,#fff,transparent),radial-gradient(1.5px 1.5px at 63% 38%,#fff,transparent),
+    radial-gradient(2px 2px at 78% 22%,#fff,transparent),radial-gradient(1.5px 1.5px at 88% 70%,#fff,transparent),
+    radial-gradient(1.5px 1.5px at 8% 84%,#fff,transparent),radial-gradient(2px 2px at 52% 88%,#fff,transparent),
+    radial-gradient(1.5px 1.5px at 93% 8%,#fff,transparent),radial-gradient(1.5px 1.5px at 35% 40%,#fff,transparent)}
+  [data-theme="night"] .stars{opacity:.9}
+
+  /* ---------- wolkjes ---------- */
+  .sky{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .cloud{position:absolute;left:0;opacity:.8;animation:drift linear infinite;will-change:transform}
+  .cloud svg{display:block;width:100%;height:auto;overflow:visible;animation:cbob 7s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translateX(-420px)}to{transform:translateX(calc(100vw + 100px))}}
+  @keyframes cbob{from{transform:translateY(-5px)}to{transform:translateY(6px)}}
+  @media (prefers-reduced-motion:reduce){.cloud{animation:none;transform:translateX(var(--x))}.cloud svg{animation:none}}
+
+  /* ---------- kop ---------- */
+  header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;z-index:5}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo .pg{width:62px}
+  .logo b{font-family:var(--font);font-size:28px;line-height:1}
+  .logo small{display:block;font-size:11px;color:var(--out2);margin-top:2px}
+  .tools{display:flex;gap:10px}
+  .pill{background:var(--pill);color:#2a2438;border:3px solid var(--ink);border-radius:999px;padding:7px 15px;font-size:14px;font-weight:700;cursor:pointer;
+    box-shadow:3px 3px 0 var(--sh);transition:transform .12s,box-shadow .12s;font-family:var(--font)}
+  .pill:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--sh)}
+  .pill:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--sh)}
+
+  /* ---------- postduif ---------- */
+  .pg svg{display:block;width:100%;height:auto;overflow:visible}
+  .pg .wing{transform-origin:44px 40px}
+  .pg .mail{display:none}
+  .pigeon{position:fixed;left:0;top:0;z-index:30;pointer-events:none;will-change:transform}
+  .pigeon.flying .pg{animation:bob .3s ease-in-out infinite alternate}
+  .pigeon.flying .pg .wing{animation:flap .15s ease-in-out infinite alternate}
+  .pigeon.flying .pg .feet{display:none}
+  .pigeon.flying.withmail .pg .mail{display:inline}
+  .pigeon.perched .pg{animation:peck 3s ease-in-out infinite}
+  .pigeon.hero{transition:opacity .4s}
+  .pigeon.hero.off{opacity:0}
+  @keyframes flap{from{transform:rotate(-30deg)}to{transform:rotate(42deg)}}
+  @keyframes bob{from{transform:translateY(-4px)}to{transform:translateY(4px)}}
+  @keyframes peck{0%,70%,100%{transform:translateY(0)}78%{transform:translateY(3px) rotate(4deg)}86%{transform:translateY(0)}92%{transform:translateY(2px)}}
+  .feather{position:fixed;z-index:29;pointer-events:none;width:13px;height:5px;border-radius:50%;background:#e9eefb;border:1.5px solid var(--ink);
+    animation:fall 1.6s ease-in forwards}
+  @keyframes fall{to{transform:translate(var(--dx),70px) rotate(var(--rr));opacity:0}}
+
+  /* ---------- vluchtroutes ---------- */
+  #stage{position:fixed;inset:0}
+
+  /* ---------- heuvel en huisjes ---------- */
+  .ground{position:fixed;left:0;right:0;bottom:0;height:250px;z-index:0;pointer-events:none}
+  .ground svg{display:block;width:100%;height:100%}
+  .dev{position:absolute;bottom:62px;width:var(--hw,120px);transform:translateX(-50%);text-align:center;cursor:pointer}
+  .dev.me{cursor:default}
+  .dev .art{position:relative;width:var(--hw,120px);height:calc(var(--hw,120px) * 1.1);transform-origin:50% 100%;transition:transform .25s}
+  .dev .hs{width:100%;height:100%}
+  .dev .hs svg{display:block;width:100%;height:100%;overflow:visible}
+  .dev:not(.me):hover .art{animation:boing .5s ease-out forwards}
+  @keyframes boing{0%{transform:scale(1,1)}25%{transform:scale(1.08,.9)}55%{transform:scale(.96,1.07) translateY(-12px)}80%{transform:scale(1.02,.98) translateY(-4px)}100%{transform:translateY(-8px) scale(1.03)}}
+  .dev:not(.me):hover .badge{animation:jiggle .5s ease-in-out}
+  .bub{position:absolute;left:50%;top:-6px;transform:translate(-50%,-100%);z-index:5;width:max-content;max-width:190px;text-align:center;background:#fffaf0;color:#2a2438;font-weight:700;font-size:14px;line-height:1.25;padding:7px 13px;border:2px solid var(--ink);border-radius:16px;box-shadow:2px 3px 0 var(--sh);pointer-events:none}
+  .bub::after{content:'';position:absolute;left:50%;bottom:-8px;width:12px;height:12px;background:#fffaf0;border:2px solid var(--ink);border-top:0;border-left:0;transform:translateX(-50%) rotate(45deg)}
+  .bub.hint{opacity:0;transform:translate(-50%,-80%);transition:opacity .2s,transform .2s}
+  .dev:hover .bub.hint{opacity:1;transform:translate(-50%,-100%)}
+  .dev.over .bub.hint,.dev.busy .bub.hint{opacity:0}
+  .bub.pop{top:-92px;animation:bubpop .35s cubic-bezier(.3,1.6,.5,1) both}
+  .bub.pop.bye{animation:bubbye .3s ease-in forwards}
+  @keyframes bubpop{from{opacity:0;transform:translate(-50%,-60%) scale(.5)}to{opacity:1;transform:translate(-50%,-100%) scale(1)}}
+  @keyframes bubbye{to{opacity:0;transform:translate(-50%,-120%) scale(.8)}}
+  @media (prefers-reduced-motion:reduce){.dev:not(.me):hover .art{animation:none;transform:translateY(-6px)}}
+  .dev.over .art{transform:scale(1.1);animation:wiggle .4s ease-in-out infinite}
+  @keyframes wiggle{25%{rotate:-3deg}75%{rotate:3deg}}
+  .art.hop{animation:househop .6s ease-out}
+  @keyframes househop{30%{transform:translateY(-14px)}60%{transform:translateY(0)}80%{transform:translateY(-4px)}}
+  .badge{position:absolute;right:-6%;top:44%;width:min(38px,calc(var(--hw,120px) * .3));aspect-ratio:1;border-radius:50%;background:#fffaf0;border:2px solid var(--ink);display:grid;place-items:center;box-shadow:2px 2px 0 var(--sh)}
+  .badge svg{width:74%;height:74%;overflow:visible}
+  .dev.me .badge{cursor:pointer;pointer-events:auto}
+  .dev .badge:hover svg{animation:jiggle .5s ease-in-out}
+  @keyframes jiggle{25%{transform:rotate(-8deg) scale(1.1)}75%{transform:rotate(8deg) scale(1.1)}}
+  .blades{transform-origin:60px 50px;animation:spin 18s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.blades{animation:none}}
+  .nm{margin-top:4px;font-weight:700;font-size:clamp(13px,calc(var(--hw,120px) * .115),20px);line-height:1.2;color:var(--out);text-shadow:0 1px 0 rgba(255,255,255,.35);padding:0 2px}
+  .nm span{display:block;white-space:nowrap}
+  .nm,.st{width:max-content;position:relative;left:50%;transform:translateX(-50%)}
+  .dev.me .nm span{cursor:pointer;border-radius:6px}
+  .dev.me .nm span:hover{background:rgba(255,255,255,.3)}
+  .st{font-size:clamp(11px,calc(var(--hw,120px) * .085),15px);font-weight:700;min-height:20px;white-space:nowrap;line-height:1.2;color:var(--out);padding:0 2px}
+  .bar{height:8px;width:min(90px,80%);margin:3px auto 0;border:2px solid var(--ink);border-radius:6px;overflow:hidden;opacity:0;transition:opacity .2s;background:#fff8}
+  .bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--accent) 0 6px,#ffb199 6px 12px);transition:width .15s}
+  .dev.busy .bar{opacity:1}
+
+  .empty{position:absolute;left:50%;top:22%;transform:translateX(-50%);text-align:center;color:var(--out);font-size:15px;max-width:330px;line-height:1.45;pointer-events:none}
+  .empty b{font-size:17px}
+  .empty span{color:var(--out2);font-size:13px}
+
+ /* ---------- post (ontvangen) ---------- */
+  #inbox{position:fixed;right:18px;top:78px;width:min(300px,calc(100vw - 36px));z-index:6;display:flex;flex-direction:column;gap:10px}
+  .card{background:var(--paper);color:#2a2438;border:2px solid var(--ink);border-radius:12px;padding:11px 14px;box-shadow:3px 3px 0 var(--sh);animation:pop .3s ease-out;position:relative}
+  @keyframes pop{from{transform:translateY(12px);opacity:0}}
+  .card .t{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card .m{font-size:12px;opacity:.7;margin-top:2px}
+  .card .pb{height:6px;border-radius:6px;margin-top:8px;overflow:hidden;background:rgba(42,36,56,.14)}
+  .card .pb i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px}
+  .card button{margin-top:9px;background:var(--accent);color:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)}
+  .card button:active{transform:translateY(1px)}
+
+  /* ---------- koppelcode ---------- */
+  #codeBox{position:fixed;inset:0;background:rgba(20,16,40,.45);display:none;place-items:center;z-index:20}
+  #codeBox.show{display:grid}
+  #codeBox .card{width:min(360px,90vw);padding:22px;user-select:text;animation:none}
+  #codeBox .card::before{display:none}
+  #codeBox input{width:100%;margin-top:12px;padding:11px 14px;font-size:20px;letter-spacing:.25em;text-transform:uppercase;border-radius:10px;border:3px solid var(--ink);background:#fffaf0;color:#2a2438;outline:none;text-align:center;font-family:var(--font)}
+  #codeBox .row{display:flex;gap:10px;margin-top:14px}
+  #codeBox .row button{flex:1;margin:0}
+  #codeBox .row .ghost{background:var(--paper2);color:#2a2438}
+
+  #dropAll{position:fixed;inset:0;display:none;place-items:center;font-size:22px;font-weight:700;z-index:4;pointer-events:none;color:var(--out)}
+  body.dragging #dropAll{display:grid;background:rgba(255,255,255,.12)}
+  #pick{display:none}
+  @media (max-width:520px){.nm,.st{width:auto;left:0;transform:none}.st{white-space:normal}.nm span{white-space:normal}.logo small,.orb{display:none}.pill{padding:6px 12px;font-size:13px}.logo .pg{width:44px}.logo b{font-size:21px}header{padding:14px 14px}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="cl"><rect x="34" y="58" width="140" height="32" rx="16"/><circle cx="62" cy="60" r="24"/><circle cx="98" cy="44" r="32"/><circle cx="136" cy="52" r="28"/><circle cx="160" cy="68" r="20"/></g>
+</defs></svg>
+<div class="sky" aria-hidden="true">
+  <div class="cloud" style="top:11%;width:290px;animation-duration:120s;animation-delay:-25s;--x:12vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/></svg></div>
+  <div class="cloud" style="top:27%;width:195px;animation-duration:160s;animation-delay:-100s;--x:70vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/><g fill="none" stroke="var(--cloudline)" stroke-width="3.5" stroke-linecap="round"><circle cx="86" cy="62" r="1.6" fill="var(--cloudline)"/><circle cx="108" cy="62" r="1.6" fill="var(--cloudline)"/><path d="M90 70q7 6 14 0"/></g></svg></div>
+  <div class="cloud" style="top:56%;width:350px;animation-duration:140s;animation-delay:-60s;--x:40vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/></svg></div>
+  <div class="cloud" style="top:73%;width:220px;animation-duration:175s;animation-delay:-130s;--x:8vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/><g fill="none" stroke="var(--cloudline)" stroke-width="3.5" stroke-linecap="round"><circle cx="86" cy="62" r="1.6" fill="var(--cloudline)"/><circle cx="108" cy="62" r="1.6" fill="var(--cloudline)"/><path d="M90 70q7 6 14 0"/></g></svg></div>
+  <div class="cloud" style="top:86%;width:280px;animation-duration:125s;animation-delay:-95s;--x:78vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/></svg></div>
+</div>
+<div class="stars"></div>
+<div class="orb"></div>
+
+<header>
+  <div class="logo">
+    <div class="pg" id="logoPg"></div>
+    <div><b>Postduif</b></div>
+  </div>
+  <div class="tools">
+    <div class="pill" id="themePill" title="Dag of nacht">🌙</div>
+    <div class="pill" id="roomPill">Koppelcode</div>
+  </div>
+</header>
+
+<div class="ground" aria-hidden="true"><svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 70Q200 10 430 62T820 44T1200 66V200H0z" fill="var(--hill1)"/><path d="M0 118Q300 66 610 108T1200 96V200H0z" fill="var(--hill2)"/></svg></div>
+
+<div id="stage">
+  <div class="dev me" id="meDev">
+    <div class="bub hint">Dit ben jij!</div>
+    <div class="art" id="meHouse"><div class="hs"></div><div class="badge" id="meArt" title="Klik om het soort apparaat te wisselen"></div></div>
+    <div class="nm"><span id="meName" title="Klik om de naam te wijzigen"></span></div>
+    <div class="st">Hier ben ik!</div>
+    <div class="bar" style="visibility:hidden"><i></i></div>
+  </div>
+  <div class="empty" id="empty"><b>Open Postduif op je andere apparaat.</b><br><span>Zodra het op hetzelfde netwerk zit, bouwt de postduif er een huisje.</span></div>
+</div>
+
+<div id="inbox"></div>
+<div id="dropAll">Laat los boven een huisje, de duif brengt het weg!</div>
+<input type="file" id="pick" multiple>
+
+<div id="codeBox">
+  <div class="card">
+    <div class="t" style="font-size:17px">Koppelen met een code</div>
+    <div class="m" style="opacity:.8;margin-top:4px">Gebruik dezelfde code op beide apparaten als ze elkaar niet vanzelf vinden (bijvoorbeeld via VPN).</div>
+    <input id="codeInput" maxlength="12" placeholder="CODE" autocomplete="off">
+    <div class="row">
+      <button class="ghost" id="codeClear">Zonder code</button>
+      <button id="codeOk">Koppelen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- dag / nacht ----------
+  const tpill = document.querySelector('#themePill');
+  let saved = null; try { saved = localStorage.getItem('drift-theme'); } catch (e) {}
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const applyTheme = t => { document.documentElement.dataset.theme = t; tpill.textContent = t === 'night' ? '☀️' : '🌙'; };
+  applyTheme(saved || (mq.matches ? 'night' : 'day'));
+  tpill.onclick = () => { const t = document.documentElement.dataset.theme === 'night' ? 'day' : 'night'; applyTheme(t); try { localStorage.setItem('drift-theme', t); } catch (e) {} };
+  mq.addEventListener && mq.addEventListener('change', e => { if (!saved) applyTheme(e.matches ? 'night' : 'day'); });
+
+  // ---------- tekeningen ----------
+  const INK = '#2a2438';
+  // postduif kijkt naar rechts; wing = vleugel (klapwiekt), mail = brief in de snavel, feet = pootjes (alleen zittend)
+  const PIGEON = `<svg viewBox="0 0 106 82" xmlns="http://www.w3.org/2000/svg" stroke="${INK}" stroke-linejoin="round" stroke-linecap="round">
+    <g class="feet" fill="none" stroke="#ff9a3c" stroke-width="3.5"><path d="M38 60v14M50 60v14"/><path d="M33 75h10M45 75h10"/></g>
+    <path d="M16 44L2 36l3 17z" fill="#7b8aaa" stroke-width="3"/>
+    <ellipse cx="42" cy="46" rx="28" ry="17" fill="#aebbd6" stroke-width="3"/>
+    <ellipse cx="46" cy="53" rx="16" ry="8" fill="#d6deef" stroke="none"/>
+    <circle cx="73" cy="30" r="12.5" fill="#aebbd6" stroke-width="3"/>
+    <ellipse cx="66" cy="39" rx="8" ry="5" fill="#7fd1b0" stroke="none"/>
+    <path d="M84 28l11 4-11 4z" fill="#ffb347" stroke-width="2.6"/>
+    <circle cx="76" cy="27" r="3.6" fill="#fff" stroke-width="1.8"/><circle cx="77" cy="27.3" r="1.7" fill="${INK}" stroke="none"/>
+    <g class="mail"><rect x="86" y="36" width="17" height="12" rx="1.5" fill="#fffaf0" stroke-width="2"/><path d="M86.5 37l8 6 8-6" fill="none" stroke-width="1.6"/></g>
+    <g class="wing"><path d="M32 39Q16 12 48 10Q60 30 53 47z" fill="#8393b8" stroke-width="3"/><path d="M40 36q4-12 14-18" fill="none" stroke-width="2" opacity=".5"/></g>
+  </svg>`;
+  const LN = 'fill="none" stroke="#2a2438" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"';
+  const face = (x1, x2, ey, sy, sw) => `<circle cx="${x1}" cy="${ey}" r="1.7" fill="#2a2438" stroke="none"/><circle cx="${x2}" cy="${ey}" r="1.7" fill="#2a2438" stroke="none"/><path d="M${x1 + 1} ${sy}q${sw / 2 - 1} 5 ${sw} 0"/>`;
+  const DRAW = {
+    desktop: `<svg viewBox="0 0 64 56" ${LN}><rect x="7" y="4" width="50" height="34" rx="5" fill="var(--screen)"/><path d="M32 38v8M20 50h24"/>${face(25, 39, 19, 26, 12)}</svg>`,
+    laptop:  `<svg viewBox="0 0 64 56" ${LN}><rect x="11" y="6" width="42" height="30" rx="4" fill="var(--screen)"/><path d="M4 41h56l-4 9H8z" fill="var(--paper)"/>${face(26, 38, 18, 25, 10)}</svg>`,
+    tablet:  `<svg viewBox="0 0 64 56" ${LN}><rect x="12" y="3" width="40" height="50" rx="6" fill="var(--screen)"/><circle cx="32" cy="47" r="1.8" fill="#2a2438" stroke="none"/>${face(25, 39, 20, 28, 12)}</svg>`,
+    phone:   `<svg viewBox="0 0 64 56" ${LN}><rect x="19" y="2" width="26" height="52" rx="6" fill="var(--screen)"/><path d="M29 7h6"/>${face(27, 37, 22, 30, 9)}</svg>`
+  };
+  const WALLS = ['#ffd9a8', '#cfe8ff', '#ffc8d8', '#d6f0c4', '#fff1a6', '#e3d4ff'];
+  const ROOFS = ['#e8503a', '#4a8fd9', '#8a6bd1', '#2fa88f', '#f08a3c', '#d94f8a'];
+  const ROOF_AT = [.17, .09, .24, .11, .2, .1, .42, .3];
+  const N_HOUSES = 8;
+  const meVariant = () => hsh(myName) % N_HOUSES; // waar de duif landt (aandeel van de hoogte)
+  const hsh = str => { let h = 0; for (const c of str) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+  function houseSVG(v, wall, roof) {
+    const win = 'fill="var(--win)"';
+    const parts = [
+      // 0 huisje met schoorsteen
+      `<rect x="82" y="26" width="12" height="30" fill="${roof}"/><circle cx="90" cy="16" r="4.5" fill="#fff" stroke-width="2"/><circle cx="97" cy="6" r="3.2" fill="#fff" stroke-width="2"/>
+       <rect x="20" y="64" width="80" height="58" rx="3" fill="${wall}"/><path d="M8 68L60 22l52 46z" fill="${roof}"/>
+       <path d="M50 122V98a10 10 0 0 1 20 0v24z" fill="#a8764a"/><circle cx="66" cy="110" r="1.6" fill="#2a2438" stroke="none"/>
+       <rect x="27" y="80" width="16" height="16" rx="2" ${win}/><path d="M35 80v16M27 88h16" fill="none" stroke-width="2"/>
+       <rect x="77" y="80" width="16" height="16" rx="2" ${win}/><path d="M85 80v16M77 88h16" fill="none" stroke-width="2"/>`,
+      // 1 grachtenpand met klokgevel
+      `<rect x="32" y="44" width="56" height="78" fill="${wall}"/><path d="M32 44q0-12 10-16q4-12 18-12q14 0 18 12q10 4 10 16z" fill="${wall}"/>
+       <circle cx="60" cy="10" r="4" fill="${roof}"/><path d="M60 14v6" fill="none"/>
+       <rect x="40" y="52" width="14" height="16" rx="2" ${win}/><rect x="66" y="52" width="14" height="16" rx="2" ${win}/>
+       <rect x="40" y="76" width="14" height="16" rx="2" ${win}/><rect x="66" y="76" width="14" height="16" rx="2" ${win}/>
+       <path d="M52 122v-14a8 8 0 0 1 16 0v14z" fill="${roof}"/>`,
+      // 2 molen
+      `<path d="M40 124L50 60h20l10 64z" fill="${wall}"/><path d="M45 60q15-30 30 0z" fill="${roof}"/>
+       <path d="M52 124v-16a8 8 0 0 1 16 0v16z" fill="${roof}"/><circle cx="60" cy="86" r="6" ${win}/>
+       <g class="blades">${[0, 90, 180, 270].map(r => `<g transform="rotate(${r} 60 50)"><path d="M56 48V6h12v42z" fill="#fffaf0"/><path d="M62 10v34M56 18h12M56 28h12M56 38h12" fill="none" stroke-width="1.6"/></g>`).join('')}</g>
+       <circle cx="60" cy="50" r="5" fill="${roof}"/>`,
+      // 3 torentje met vlag
+      `<path d="M60 14V2" fill="none"/><path d="M60 2l15 4.5L60 11z" fill="${roof}" stroke-width="2.5"/>
+       <rect x="38" y="58" width="44" height="64" fill="${wall}"/><path d="M30 62L60 14l30 48z" fill="${roof}"/>
+       <circle cx="60" cy="82" r="7.5" ${win}/><path d="M52 122v-14a8 8 0 0 1 16 0v14z" fill="${roof}"/>
+       <path d="M44 72h8M70 96h8M44 104h6" fill="none" stroke-width="2" opacity=".45"/>`,
+      // 4 boerderij met ronde dak
+      `<rect x="14" y="68" width="92" height="54" fill="${wall}"/><path d="M6 72Q60 8 114 72z" fill="${roof}"/>
+       <rect x="44" y="88" width="32" height="34" rx="2" fill="#fffaf0"/><path d="M44 88l32 34M76 88L44 122" fill="none" stroke-width="2.5"/>
+       <circle cx="60" cy="58" r="7" ${win}/>`,
+      // 5 kerkje
+      `<path d="M8 88L25 70l17 18z" fill="${roof}"/><rect x="12" y="88" width="26" height="34" fill="${wall}"/>
+       <path d="M78 88L95 70l17 18z" fill="${roof}"/><rect x="82" y="88" width="26" height="34" fill="${wall}"/>
+       <rect x="44" y="46" width="32" height="76" fill="${wall}"/><path d="M39 48L60 14l21 34z" fill="${roof}"/>
+       <path d="M60 14V3M55 7.5h10" fill="none" stroke-width="2.6"/>
+       <path d="M53 66v-6a7 7 0 0 1 14 0v6z" ${win}/><path d="M53 66h14" fill="none" stroke-width="2"/>
+       <path d="M51 122v-16a9 9 0 0 1 18 0v16z" fill="#a8764a"/>
+       <rect x="19" y="98" width="12" height="14" rx="6" ${win}/><rect x="89" y="98" width="12" height="14" rx="6" ${win}/>`,
+      // 6 bungalow
+      `<rect x="86" y="42" width="11" height="22" fill="${roof}"/><circle cx="94" cy="32" r="4" fill="#fff" stroke-width="2"/>
+       <rect x="8" y="76" width="104" height="46" rx="3" fill="${wall}"/><path d="M2 80L22 54H98l20 26z" fill="${roof}"/>
+       <path d="M50 122v-24a10 10 0 0 1 20 0v24z" fill="#a8764a"/>
+       <rect x="16" y="90" width="22" height="16" rx="2" ${win}/><path d="M27 90v16" fill="none" stroke-width="2"/>
+       <rect x="82" y="90" width="22" height="16" rx="2" ${win}/><path d="M93 90v16" fill="none" stroke-width="2"/>`,
+      // 7 trapgevel
+      `<path d="M28 122V64h10V52h10V40h24v12h10v12h10v58z" fill="${wall}"/>
+       <circle cx="60" cy="31" r="4.5" fill="${roof}"/>
+       <rect x="38" y="70" width="14" height="16" rx="2" ${win}/><rect x="68" y="70" width="14" height="16" rx="2" ${win}/>
+       <rect x="53" y="46" width="14" height="14" rx="7" ${win}/>
+       <path d="M50 122v-14a10 10 0 0 1 20 0v14z" fill="${roof}"/><path d="M38 96h14M68 96h14" fill="none" stroke-width="2" opacity=".5"/>`
+    ];
+    return `<svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><g stroke="#2a2438" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">${parts[v]}</g></svg>`;
+  }
+  const KINDS = ['desktop', 'laptop', 'tablet', 'phone'];
+  const KIND_NAME = { desktop: 'Computer', laptop: 'Laptop', tablet: 'Tablet', phone: 'Telefoon' };
+  function guessKind() {
+    const ua = navigator.userAgent;
+    if (/iPhone|iPod/.test(ua) || (/Android/.test(ua) && /Mobile/.test(ua))) return 'phone';
+    if (/iPad|Tablet|Android/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'tablet';
+    return 'desktop';
+  }
+  let kind = guessKind();
+  const $ = s => document.querySelector(s);
+  $('#logoPg').innerHTML = PIGEON;
+
+  // ---------- identiteit ----------
+  const store = { get:k=>{try{return localStorage.getItem(k)}catch(e){return null}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}} };
+  const rnd = n => Array.from(crypto.getRandomValues(new Uint8Array(n)),b=>b.toString(36).padStart(2,'0')).join('').slice(0,n*2-2);
+  let myId = sessionStorage.getItem('drift-id') || rnd(10);
+  sessionStorage.setItem('drift-id', myId);
+  let myName = store.get('drift-name');
+  if (!myName) {
+    const def = KIND_NAME[kind];
+    myName = (prompt('Hoe wil je dit apparaat noemen? (bijvoorbeeld Werk-pc of Telefoon)', def) || def).trim().slice(0,30) || def;
+  }
+  store.set('drift-name', myName);
+  let room = (store.get('drift-room') || '').toUpperCase();
+  const savedKind = store.get('drift-kind');
+  if (KINDS.includes(savedKind)) kind = savedKind;
+  else if (kind === 'desktop' && navigator.getBattery) {
+    // heuristiek: een laptop heeft een accu, een desktop meestal niet
+    navigator.getBattery().then(b => {
+      const hasBattery = !(b.charging && b.level === 1 && b.chargingTime === 0 && b.dischargingTime === Infinity);
+      if (hasBattery && !store.get('drift-kind') && kind === 'desktop') { kind = 'laptop'; renderMe(); connectEvents(); }
+    }).catch(() => {});
+  }
+
+  const today = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+  const renderMe = () => { $('#meArt').innerHTML = DRAW[kind]; $('#meHouse .hs').innerHTML = houseSVG(meVariant(), WALLS[hsh(myName) % 6], ROOFS[(hsh(myName) >>> 4) % 6]); $('#meDev').dataset.roof = ROOF_AT[meVariant()]; $('#meName').textContent = myName; $('#roomPill').textContent = room ? `Code: ${room}` : 'Koppelcode'; };
+  renderMe();
+  $('#meName').onclick = () => {
+    const n = prompt('Naam van dit apparaat:', myName);
+    if (n && n.trim()) { myName = n.trim().slice(0,30); store.set('drift-name', myName); renderMe(); connectEvents(); }
+  };
+
+  $('#meArt').onclick = () => { kind = KINDS[(KINDS.indexOf(kind) + 1) % KINDS.length]; store.set('drift-kind', kind); renderMe(); connectEvents(); };
+
+  // ---------- koppelcode ----------
+  $('#roomPill').onclick = () => { $('#codeInput').value = room; $('#codeBox').classList.add('show'); $('#codeInput').focus(); };
+  $('#codeBox').onclick = e => { if (e.target.id === 'codeBox') $('#codeBox').classList.remove('show'); };
+  $('#codeOk').onclick = () => { room = $('#codeInput').value.toUpperCase().replace(/[^A-Z0-9]/g,''); store.set('drift-room', room); $('#codeBox').classList.remove('show'); renderMe(); connectEvents(); };
+  $('#codeClear').onclick = () => { room = ''; store.set('drift-room',''); $('#codeBox').classList.remove('show'); renderMe(); connectEvents(); };
+  $('#codeInput').onkeydown = e => { if (e.key === 'Enter') $('#codeOk').click(); };
+
+  // ---------- postduiven in de lucht ----------
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const myRoll = () => $('#meHouse');
+  const rollOf = id => document.querySelector(`.dev[data-id="${id}"] .art`);
+  const foot = el => {
+    const r = el.getBoundingClientRect(), d = el.closest('.dev');
+    return { x: r.left + r.width / 2, y: r.top + r.height * parseFloat((d && d.dataset.roof) || .15) };
+  };
+  const devOf = id => document.querySelector(`.dev[data-id="${id}"]`);
+  const nameOf = id => { const q = peers.find(x => x.id === id); return q ? q.name : 'een ander apparaat'; };
+  function bubble(dev, text, ms = 3200) {
+    if (!dev) return;
+    dev.querySelectorAll('.bub.pop').forEach(b => b.remove());
+    const b = document.createElement('div'); b.className = 'bub pop'; b.textContent = text; dev.appendChild(b);
+    setTimeout(() => { b.classList.add('bye'); setTimeout(() => b.remove(), 320); }, ms);
+  }
+  const hop = el => { if (!el) return; el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); setTimeout(() => el.classList.remove('hop'), 700); };
+  const PW = innerWidth < 520 ? 104 : 150, PH = PW * 82 / 106;
+  const ease = u => u < .5 ? 2 * u * u : -1 + (4 - 2 * u) * u;
+
+  function makePigeon(start, { mail = false } = {}) {
+    const el = document.createElement('div');
+    el.className = 'pigeon flying' + (mail ? ' withmail' : '');
+    el.style.width = PW + 'px';
+    el.innerHTML = `<div class="pg">${PIGEON}</div>`;
+    el._pos = start;
+    el.style.transform = `translate(${start.x - PW / 2}px,${start.y - PH * .9}px)`;
+    document.body.appendChild(el);
+    return el;
+  }
+  function feather(x, y) {
+    const f = document.createElement('i');
+    f.className = 'feather';
+    f.style.cssText = `left:${x}px;top:${y}px;--dx:${(Math.random() - .5) * 70}px;--rr:${(Math.random() - .5) * 400}deg`;
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 1700);
+  }
+  // één vlucht van de huidige plek van de duif naar punt "to" (boog door de lucht, klapperende vleugels, veertjes)
+  function leg(pg, to, ms) {
+    return new Promise(res => {
+      const a = pg._pos, b = to;
+      const dir = b.x < a.x ? -1 : 1;
+      if (Math.abs(b.x - a.x) > 8) pg.querySelector('svg').style.transform = `scaleX(${dir})`;
+      pg.classList.remove('perched'); pg.classList.add('flying');
+      const dist = Math.hypot(b.x - a.x, b.y - a.y), lift = 70 + dist * .14;
+      const mx = (a.x + b.x) / 2, my = Math.max(Math.min(a.y, b.y) - lift, (4 * (PH * .95 + 75) - a.y - b.y) / 2);
+      const pt = u => ({ x: (1 - u) ** 2 * a.x + 2 * (1 - u) * u * mx + u * u * b.x, y: (1 - u) ** 2 * a.y + 2 * (1 - u) * u * my + u * u * b.y });
+      const frames = [];
+      for (let i = 0; i <= 20; i++) {
+        const u = i / 20, p = pt(ease(u)), q = pt(ease(Math.min(1, u + .04)));
+        const ang = Math.atan2(q.y - p.y, Math.abs(q.x - p.x) + .01) * 23;
+        frames.push({ transform: `translate(${p.x - PW / 2}px,${p.y - PH * .9}px) rotate(${dir * ang}deg)`, offset: u });
+      }
+      const t0 = performance.now();
+      const fe = setInterval(() => { const p = pt(ease(Math.min(1, (performance.now() - t0) / ms))); feather(p.x, p.y - PH * .3); }, 170);
+      const an = pg.animate(frames, { duration: ms, easing: 'linear' });
+      an.finished.catch(() => {}).then(() => {
+        clearInterval(fe);
+        pg.style.transform = `translate(${b.x - PW / 2}px,${b.y - PH * .9}px)`;
+        pg._pos = b; res();
+      });
+    });
+  }
+  const land = pg => {
+    pg.classList.remove('flying', 'withmail'); pg.classList.add('perched');
+    if (pg._pos && pg._pos.side) pg.querySelector('svg').style.transform = `scaleX(${pg._pos.side > 0 ? -1 : 1})`; // kijkt naar het kaartje
+  };
+
+  // de duif van dit apparaat vliegt rondjes boven je eigen krant zolang er geen post is
+  let flights = 0;
+  const hero = makePigeon({ x: -200, y: -200 });
+  hero.classList.add('hero');
+  (function orbit() {
+    let T = Math.random() * 6, last = performance.now(), face = 1;
+    const svg = hero.querySelector('svg');
+    function tick(ts) {
+      const dt = ts - last; last = ts; T += dt * .00055;
+      const r = myRoll().getBoundingClientRect();
+      const A = innerWidth < 520 ? 70 : 165, B = innerWidth < 520 ? 24 : 42;
+      const cx = r.left + r.width / 2, cy = r.top - PH * .8;
+      const x = cx + A * Math.cos(T), y = Math.max(PH / 2 + 66, cy + B * Math.sin(T) + 5 * Math.sin(T * 11));
+      const f = Math.sin(T) < 0 ? 1 : -1;
+      if (f !== face) { face = f; svg.style.transform = `scaleX(${f})`; }
+      hero.style.transform = `translate(${x - PW / 2}px,${y - PH / 2}px) rotate(${-f * 4 * Math.cos(T)}deg)`;
+      if (Math.random() < .004) feather(x, y);
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+  const heroUpdate = () => hero.classList.toggle('off', flights > 0);
+
+  // post komt binnen: duif vliegt van de verzender naar mijn krant
+  async function incoming(pid) {
+    flights++; heroUpdate();
+    const src = rollOf(pid);
+    const pg = makePigeon(src ? foot(src) : { x: innerWidth / 2, y: -80 }, { mail: true });
+    await leg(pg, foot(myRoll()), 1700);
+    land(pg); hop(myRoll()); bubble($('#meDev'), '📬 Post van ' + nameOf(pid) + '!', 3800);
+    await sleep(1100);
+    pg.style.transition = 'opacity .4s'; pg.style.opacity = 0;
+    await sleep(450);
+    pg.remove(); flights--; heroUpdate();
+  }
+
+  // af en toe vliegt er een extra duif voorbij
+  (function ambient() {
+    setTimeout(async () => {
+      if (!document.hidden) {
+        const y = 110 + Math.random() * (innerHeight * .5), ltr = Math.random() > .5;
+        const pg = makePigeon({ x: ltr ? -100 : innerWidth + 100, y });
+        await leg(pg, { x: ltr ? innerWidth + 100 : -100, y: y - 40 }, 7000);
+        pg.remove();
+      }
+      ambient();
+    }, 20000 + Math.random() * 25000);
+  })();
+
+  // ---------- signalering ----------
+  let es, peers = [];
+  function connectEvents() {
+    if (es) es.close();
+    es = new EventSource(`/events?id=${myId}&name=${encodeURIComponent(myName)}&kind=${kind}&room=${encodeURIComponent(room)}`);
+    es.addEventListener('peers', e => { peers = JSON.parse(e.data); renderPeers(); });
+    es.addEventListener('signal', e => onSignal(JSON.parse(e.data)));
+    es.onerror = () => { /* EventSource probeert vanzelf opnieuw */ };
+  }
+  const post = (to, data) => fetch('/signal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ from: myId, to, data }) });
+
+  // ---------- WebRTC ----------
+  const conns = new Map(); // peerId -> { pc, dc, ready:Promise, pendingIce:[] }
+  const RTC_CFG = { iceServers: [] }; // alleen lokaal netwerk, geen externe STUN nodig
+
+  function makeConn(pid) {
+    const c = { pc: new RTCPeerConnection(RTC_CFG), dc: null, pendingIce: [], remoteSet: false };
+    c.pc.onicecandidate = e => { if (e.candidate) post(pid, { candidate: e.candidate }); };
+    c.pc.onconnectionstatechange = () => {
+      if (['failed','closed','disconnected'].includes(c.pc.connectionState)) { try{c.pc.close()}catch(e){} if (conns.get(pid) === c) conns.delete(pid); }
+    };
+    c.pc.ondatachannel = e => setupDc(pid, c, e.channel);
+    conns.set(pid, c);
+    return c;
+  }
+
+  function open(pid) {
+    const ex = conns.get(pid);
+    if (ex && ex.dc && ex.dc.readyState === 'open') return Promise.resolve(ex);
+    if (ex && ex.opening) return ex.opening;
+    const c = ex || makeConn(pid);
+    c.opening = new Promise(async (res, rej) => {
+      const t = setTimeout(() => rej(new Error('Verbinden duurde te lang')), 12000);
+      const dc = c.pc.createDataChannel('drift');
+      setupDc(pid, c, dc, () => { clearTimeout(t); res(c); });
+      const offer = await c.pc.createOffer();
+      await c.pc.setLocalDescription(offer);
+      post(pid, { sdp: c.pc.localDescription });
+    });
+    c.opening.finally(() => { c.opening = null; }).catch(()=>{});
+    return c.opening;
+  }
+
+  async function onSignal({ from, data }) {
+    let c = conns.get(from);
+    if (data.sdp && data.sdp.type === 'offer') {
+      if (c) { try{c.pc.close()}catch(e){} conns.delete(from); }
+      c = makeConn(from);
+      await c.pc.setRemoteDescription(data.sdp);
+      c.remoteSet = true;
+      for (const i of c.pendingIce) await c.pc.addIceCandidate(i).catch(()=>{});
+      c.pendingIce = [];
+      const ans = await c.pc.createAnswer();
+      await c.pc.setLocalDescription(ans);
+      post(from, { sdp: c.pc.localDescription });
+    } else if (data.sdp && data.sdp.type === 'answer' && c) {
+      await c.pc.setRemoteDescription(data.sdp);
+      c.remoteSet = true;
+      for (const i of c.pendingIce) await c.pc.addIceCandidate(i).catch(()=>{});
+      c.pendingIce = [];
+    } else if (data.candidate && c) {
+      if (c.remoteSet) c.pc.addIceCandidate(data.candidate).catch(()=>{});
+      else c.pendingIce.push(data.candidate);
+    }
+  }
+
+  // ---------- ontvangen ----------
+  function setupDc(pid, c, dc, onOpen) {
+    c.dc = dc;
+    dc.binaryType = 'arraybuffer';
+    dc.bufferedAmountLowThreshold = 1 << 20;
+    dc.onopen = () => onOpen && onOpen();
+    let cur = null;
+    dc.onmessage = e => {
+      if (typeof e.data === 'string') {
+        const m = JSON.parse(e.data);
+        if (m.t === 'meta') {
+          cur = { ...m, got: 0, chunks: [], card: makeCard(m, pid) };
+          incoming(pid);
+        } else if (m.t === 'end' && cur) {
+          const blob = new Blob(cur.chunks, { type: cur.type || 'application/octet-stream' });
+          finishCard(cur.card, blob, cur.name);
+          cur = null;
+        }
+      } else if (cur) {
+        cur.chunks.push(e.data);
+        cur.got += e.data.byteLength;
+        cur.card.bar.style.width = (cur.got / cur.size * 100) + '%';
+        cur.card.sub.textContent = `${fmt(cur.got)} van ${fmt(cur.size)}`;
+      }
+    };
+  }
+
+  const fmt = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(0) + ' KB' : n < 1073741824 ? (n/1048576).toFixed(1) + ' MB' : (n/1073741824).toFixed(2) + ' GB';
+  const peerName = id => (peers.find(p => p.id === id) || {}).name || 'Onbekend apparaat';
+
+  function makeCard(m, pid) {
+    const el = document.createElement('div');
+    el.className = 'card letter';
+    el.innerHTML = '<div class="t"></div><div class="m"></div><div class="pb"><i></i></div>';
+    el.querySelector('.t').textContent = m.name;
+    el.querySelector('.m').textContent = `Post van ${peerName(pid)}`;
+    $('#inbox').prepend(el);
+    return { el, bar: el.querySelector('.pb i'), sub: el.querySelector('.m'), from: peerName(pid) };
+  }
+  function finishCard(card, blob, name) {
+    card.bar.style.width = '100%';
+    card.sub.textContent = `Post van ${card.from} · ${fmt(blob.size)}`;
+    const url = URL.createObjectURL(blob);
+    const b = document.createElement('button');
+    b.textContent = 'Opslaan';
+    b.onclick = () => { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
+    card.el.appendChild(b);
+  }
+
+  // ---------- versturen ----------
+  const CHUNK = 64 * 1024;
+  async function courier(pid, work) {
+    const node = document.querySelector(`.dev[data-id="${pid}"]`);
+    const st = node && node.querySelector('.st'), bar = node && node.querySelector('.bar i');
+    const set = t => { if (st) st.textContent = t || st.dataset.def; };
+    let pg = null;
+    flights++; heroUpdate();
+    try {
+      set('De duif vertrekt...');
+      pg = makePigeon(foot(myRoll()), { mail: true });
+      const flight = leg(pg, foot(rollOf(pid)), 1800);
+      const c = await open(pid);
+      await flight;
+      land(pg); hop(rollOf(pid));
+      node && node.classList.add('busy');
+      await work(c, set, bar);
+      set('Bezorgd! ✓'); bubble(devOf(pid), '✓ Bezorgd!', 2600);
+      await sleep(700);
+    } catch (e) {
+      set('De duif is verdwaald, probeer opnieuw');
+    } finally {
+      if (pg) { await leg(pg, foot(myRoll()), 1500); hop(myRoll()); pg.remove(); }
+      flights--; heroUpdate();
+      setTimeout(() => { node && node.classList.remove('busy'); if (bar) bar.style.width = '0'; set(''); }, 1800);
+    }
+  }
+
+  const sendFiles = (pid, files) => courier(pid, async (c, set, bar) => {
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      c.dc.send(JSON.stringify({ t:'meta', name:f.name, size:f.size, type:f.type }));
+      let off = 0;
+      while (off < f.size) {
+        if (c.dc.bufferedAmount > (4 << 20)) {
+          await new Promise(r => { c.dc.onbufferedamountlow = () => { c.dc.onbufferedamountlow = null; r(); }; });
+        }
+        const buf = await f.slice(off, off + CHUNK).arrayBuffer();
+        c.dc.send(buf);
+        off += buf.byteLength;
+        if (bar) bar.style.width = (off / f.size * 100) + '%';
+        set(`${f.name.length > 18 ? f.name.slice(0,16) + '…' : f.name} ${(off/f.size*100|0)}%`);
+      }
+      c.dc.send(JSON.stringify({ t:'end' }));
+    }
+  });
+  // ---------- apparaten tekenen ----------
+  function renderPeers() {
+    const stage = $('#stage');
+    stage.querySelectorAll('.dev:not(.me)').forEach(n => n.remove());
+    $('#empty').style.display = peers.length ? 'none' : 'block';
+    const w = innerWidth;
+    const sorted = [...peers].sort((a, b) => a.name.localeCompare(b.name));
+    const mid = Math.floor((sorted.length + 1) / 2);
+    const items = [...sorted.slice(0, mid), 'me', ...sorted.slice(mid)];
+    const n = items.length;
+    const spacing = Math.min(300, w / (n + 0.6));
+    const hw = Math.max(80, Math.min(165, innerHeight * 0.23, spacing * 0.9));
+    const x0 = w / 2 - (n - 1) * spacing / 2;
+    const def = 'Sleep een bestand';
+    let pi = meVariant() + 1;
+    items.forEach((it, i) => {
+      const x = x0 + i * spacing;
+      if (it === 'me') { const m = $('#meDev'); m.style.left = x + 'px'; m.style.setProperty('--hw', hw + 'px'); return; }
+      const p = it, v = pi++ % N_HOUSES, hh = hsh(p.name);
+      const el = document.createElement('div');
+      el.className = 'dev';
+      el.dataset.id = p.id;
+      el.dataset.roof = ROOF_AT[v];
+      el.style.left = x + 'px';
+      el.style.setProperty('--hw', hw + 'px');
+      el.innerHTML = `<div class="bub hint">Klik of sleep een bestand hierheen</div><div class="art"><div class="hs">${houseSVG(v, WALLS[hh % 6], ROOFS[(hh >>> 4) % 6])}</div><div class="badge">${DRAW[p.kind] || DRAW.desktop}</div></div>
+        <div class="nm"><span></span></div>
+        <div class="st" data-def="${def}">${def}</div>
+        <div class="bar"><i></i></div>`;
+      el.querySelector('.nm span').textContent = p.name;
+      el.onclick = () => { pickTarget = p.id; $('#pick').click(); };
+      const st = el.querySelector('.st');
+      el.ondragover = e => { e.preventDefault(); el.classList.add('over'); st.textContent = 'Laat los, de duif brengt het!'; };
+      el.ondragleave = () => { el.classList.remove('over'); st.textContent = st.dataset.def; };
+      el.ondrop = e => {
+        e.preventDefault(); e.stopPropagation();
+        el.classList.remove('over'); document.body.classList.remove('dragging'); st.textContent = st.dataset.def;
+        if (e.dataTransfer.files.length) sendFiles(p.id, [...e.dataTransfer.files]);
+      };
+      stage.appendChild(el);
+    });
+  }
+  let pickTarget = null;
+  $('#pick').onchange = e => { if (pickTarget && e.target.files.length) sendFiles(pickTarget, [...e.target.files]); e.target.value = ''; };
+
+  // sleep-hint over het hele scherm
+  let dragDepth = 0;
+  addEventListener('dragenter', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { dragDepth++; document.body.classList.add('dragging'); } });
+  addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove('dragging'); });
+  addEventListener('dragover', e => e.preventDefault());
+  addEventListener('drop', e => { e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging'); });
+  addEventListener('resize', renderPeers);
+
+  renderPeers();
+  connectEvents();
+})();
+</script>
+</body>
+</html>
