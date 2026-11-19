@@ -171,9 +171,9 @@
 </defs></svg>
 <div class="sky" aria-hidden="true">
   <div class="cloud" style="top:11%;width:290px;animation-duration:120s;animation-delay:-25s;--x:12vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/></svg></div>
-  <div class="cloud" style="top:27%;width:195px;animation-duration:160s;animation-delay:-100s;--x:70vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/><g fill="none" stroke="var(--cloudline)" stroke-width="3.5" stroke-linecap="round"><circle cx="86" cy="62" r="1.6" fill="var(--cloudline)"/><circle cx="108" cy="62" r="1.6" fill="var(--cloudline)"/><path d="M90 70q7 6 14 0"/></g></svg></div>
+  <div class="cloud" style="top:27%;width:195px;animation-duration:160s;animation-delay:-100s;--x:70vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/><g fill="none" stroke="var(--cloudline)" stroke-width="3.5" stroke-linecap="round"><circle cx="86" cy="62" r="1.6" style="fill:var(--cloudline)"/><circle cx="108" cy="62" r="1.6" style="fill:var(--cloudline)"/><path d="M90 70q7 6 14 0"/></g></svg></div>
   <div class="cloud" style="top:56%;width:350px;animation-duration:140s;animation-delay:-60s;--x:40vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/></svg></div>
-  <div class="cloud" style="top:73%;width:220px;animation-duration:175s;animation-delay:-130s;--x:8vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/><g fill="none" stroke="var(--cloudline)" stroke-width="3.5" stroke-linecap="round"><circle cx="86" cy="62" r="1.6" fill="var(--cloudline)"/><circle cx="108" cy="62" r="1.6" fill="var(--cloudline)"/><path d="M90 70q7 6 14 0"/></g></svg></div>
+  <div class="cloud" style="top:73%;width:220px;animation-duration:175s;animation-delay:-130s;--x:8vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/><g fill="none" stroke="var(--cloudline)" stroke-width="3.5" stroke-linecap="round"><circle cx="86" cy="62" r="1.6" style="fill:var(--cloudline)"/><circle cx="108" cy="62" r="1.6" style="fill:var(--cloudline)"/><path d="M90 70q7 6 14 0"/></g></svg></div>
   <div class="cloud" style="top:86%;width:280px;animation-duration:125s;animation-delay:-95s;--x:78vw"><svg viewBox="0 0 208 106"><use href="#cl" style="fill:var(--cloudline);stroke:var(--cloudline);stroke-width:6;stroke-linejoin:round"/><use href="#cl" style="fill:var(--cloud);stroke:none"/></svg></div>
 </div>
 <div class="stars"></div>
@@ -190,7 +190,7 @@
   </div>
 </header>
 
-<div class="ground" aria-hidden="true"><svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 70Q200 10 430 62T820 44T1200 66V200H0z" fill="var(--hill1)"/><path d="M0 118Q300 66 610 108T1200 96V200H0z" fill="var(--hill2)"/></svg></div>
+<div class="ground" aria-hidden="true"><svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 70Q200 10 430 62T820 44T1200 66V200H0z" style="fill:var(--hill1)"/><path d="M0 118Q300 66 610 108T1200 96V200H0z" style="fill:var(--hill2)"/></svg></div>
 
 <div id="stage">
   <div class="dev me" id="meDev">
@@ -248,10 +248,10 @@
   const LN = 'fill="none" stroke="#2a2438" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"';
   const face = (x1, x2, ey, sy, sw) => `<circle cx="${x1}" cy="${ey}" r="1.7" fill="#2a2438" stroke="none"/><circle cx="${x2}" cy="${ey}" r="1.7" fill="#2a2438" stroke="none"/><path d="M${x1 + 1} ${sy}q${sw / 2 - 1} 5 ${sw} 0"/>`;
   const DRAW = {
-    desktop: `<svg viewBox="0 0 64 56" ${LN}><rect x="7" y="4" width="50" height="34" rx="5" fill="var(--screen)"/><path d="M32 38v8M20 50h24"/>${face(25, 39, 19, 26, 12)}</svg>`,
-    laptop:  `<svg viewBox="0 0 64 56" ${LN}><rect x="11" y="6" width="42" height="30" rx="4" fill="var(--screen)"/><path d="M4 41h56l-4 9H8z" fill="var(--paper)"/>${face(26, 38, 18, 25, 10)}</svg>`,
-    tablet:  `<svg viewBox="0 0 64 56" ${LN}><rect x="12" y="3" width="40" height="50" rx="6" fill="var(--screen)"/><circle cx="32" cy="47" r="1.8" fill="#2a2438" stroke="none"/>${face(25, 39, 20, 28, 12)}</svg>`,
-    phone:   `<svg viewBox="0 0 64 56" ${LN}><rect x="19" y="2" width="26" height="52" rx="6" fill="var(--screen)"/><path d="M29 7h6"/>${face(27, 37, 22, 30, 9)}</svg>`
+    desktop: `<svg viewBox="0 0 64 56" ${LN}><rect x="7" y="4" width="50" height="34" rx="5" style="fill:var(--screen)"/><path d="M32 38v8M20 50h24"/>${face(25, 39, 19, 26, 12)}</svg>`,
+    laptop:  `<svg viewBox="0 0 64 56" ${LN}><rect x="11" y="6" width="42" height="30" rx="4" style="fill:var(--screen)"/><path d="M4 41h56l-4 9H8z" style="fill:var(--paper)"/>${face(26, 38, 18, 25, 10)}</svg>`,
+    tablet:  `<svg viewBox="0 0 64 56" ${LN}><rect x="12" y="3" width="40" height="50" rx="6" style="fill:var(--screen)"/><circle cx="32" cy="47" r="1.8" fill="#2a2438" stroke="none"/>${face(25, 39, 20, 28, 12)}</svg>`,
+    phone:   `<svg viewBox="0 0 64 56" ${LN}><rect x="19" y="2" width="26" height="52" rx="6" style="fill:var(--screen)"/><path d="M29 7h6"/>${face(27, 37, 22, 30, 9)}</svg>`
   };
   const WALLS = ['#ffd9a8', '#cfe8ff', '#ffc8d8', '#d6f0c4', '#fff1a6', '#e3d4ff'];
   const ROOFS = ['#e8503a', '#4a8fd9', '#8a6bd1', '#2fa88f', '#f08a3c', '#d94f8a'];
@@ -260,7 +260,7 @@
   const meVariant = () => hsh(myName) % N_HOUSES; // waar de duif landt (aandeel van de hoogte)
   const hsh = str => { let h = 0; for (const c of str) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
   function houseSVG(v, wall, roof) {
-    const win = 'fill="var(--win)"';
+    const win = 'style="fill:var(--win)"';
     const parts = [
       // 0 huisje met schoorsteen
       `<rect x="82" y="26" width="12" height="30" fill="${roof}"/><circle cx="90" cy="16" r="4.5" fill="#fff" stroke-width="2"/><circle cx="97" cy="6" r="3.2" fill="#fff" stroke-width="2"/>
