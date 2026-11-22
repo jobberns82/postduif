@@ -20,6 +20,7 @@
     --out:#2a2438; --out2:#4d5a78; --pill:#fff6dc;
     --orb:#ffd84a; --screen:#bfe3ff; --cloud:#ffffff; --cloudline:#c3d3ec; --win:#bfe3ff; --hill1:#aee3a6; --hill2:#88d184;
     --font:"Comic Sans MS","Comic Sans","Chalkboard SE","Marker Felt","Comic Neue",cursive,sans-serif;
+    --body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --serif:"Comic Sans MS","Comic Sans","Chalkboard SE","Marker Felt","Comic Neue",cursive,sans-serif;
   }
   [data-theme="night"]{
@@ -32,7 +33,7 @@
   *{box-sizing:border-box;margin:0}
   html,body{height:100%;overflow:hidden}
   body{
-    font-family:var(--font);color:var(--out);user-select:none;
+    font-family:var(--body);color:var(--out);user-select:none;
     background-image:linear-gradient(180deg,var(--bg1),var(--bg2));
     transition:color .4s;
   }
@@ -145,18 +146,43 @@
   .card .m{font-size:12px;opacity:.7;margin-top:2px}
   .card .pb{height:6px;border-radius:6px;margin-top:8px;overflow:hidden;background:rgba(42,36,56,.14)}
   .card .pb i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px}
-  .card button{margin-top:9px;background:var(--accent);color:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)}
+  .card button{margin-top:9px;background:var(--accent);color:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
   .card button:active{transform:translateY(1px)}
 
-  /* ---------- koppelcode ---------- */
-  #codeBox{position:fixed;inset:0;background:rgba(20,16,40,.45);display:none;place-items:center;z-index:20}
-  #codeBox.show{display:grid}
-  #codeBox .card{width:min(360px,90vw);padding:22px;user-select:text;animation:none}
-  #codeBox .card::before{display:none}
-  #codeBox input{width:100%;margin-top:12px;padding:11px 14px;font-size:20px;letter-spacing:.25em;text-transform:uppercase;border-radius:10px;border:3px solid var(--ink);background:#fffaf0;color:#2a2438;outline:none;text-align:center;font-family:var(--font)}
-  #codeBox .row{display:flex;gap:10px;margin-top:14px}
-  #codeBox .row button{flex:1;margin:0}
-  #codeBox .row .ghost{background:var(--paper2);color:#2a2438}
+  /* ---------- briefjes (pincode en apparaatnaam) ---------- */
+  .dlg{position:fixed;inset:0;background:rgba(20,16,40,.45);display:none;place-items:center;z-index:40;padding:70px 16px 16px;overflow:auto}
+  .dlg.show{display:grid}
+  .dlg.show .letter{animation:letterin .45s cubic-bezier(.3,1.5,.5,1) both}
+  @keyframes letterin{from{opacity:0;transform:translateY(40px) rotate(-3deg) scale(.9)}to{opacity:1;transform:none}}
+  .letter{position:relative;width:min(380px,100%);background:var(--paper);color:#2a2438;border:3px solid var(--ink);border-radius:16px;padding:44px 24px 22px;box-shadow:6px 6px 0 var(--sh);text-align:center;user-select:text}
+  .letter::before{content:'';position:absolute;left:0;right:0;top:0;height:14px;border-radius:13px 13px 0 0;border-bottom:3px solid var(--ink);
+    background:repeating-linear-gradient(-45deg,#e8503a 0 14px,#fff6dc 14px 22px,#4a86d8 22px 36px,#fff6dc 36px 44px)}
+  .stamp{position:absolute;right:14px;top:26px;width:42px;height:50px;border:2px dashed #2a2438;border-radius:4px;background:#fffaf0;display:grid;place-items:center;transform:rotate(6deg);font-family:var(--font);font-size:11px;font-weight:700;line-height:1.1;color:#e8503a;opacity:.9}
+  .dpg{position:absolute;left:50%;top:-62px;width:104px;transform:translateX(-50%);pointer-events:none;animation:bob .5s ease-in-out infinite alternate}
+  .dpg .pg{width:100%}
+  .dpg.withmail .pg .mail{display:inline}
+  .letter h2{font-family:var(--font);font-size:23px;line-height:1.15;margin:4px 40px 0}
+  .letter p{font-size:14px;line-height:1.4;opacity:.8;margin-top:8px}
+  .letter .btns{display:flex;gap:10px;margin-top:18px}
+  .letter .btn{flex:1;font:inherit;font-weight:700;font-size:15px;padding:10px 14px;border-radius:999px;border:3px solid var(--ink);background:var(--accent);color:#fff;cursor:pointer;box-shadow:3px 3px 0 var(--sh);transition:transform .12s,box-shadow .12s}
+  .letter .btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--sh)}
+  .letter .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--sh)}
+  .letter .btn.ghost{background:var(--paper2);color:#2a2438}
+  .letter .msg{min-height:18px;margin-top:10px;font-size:13px;font-weight:700;color:#c43a26}
+  #pin{display:flex;justify-content:center;gap:10px;margin-top:18px}
+  #pin input{width:58px;height:70px;padding:0;text-align:center;font-family:var(--font);font-size:34px;font-weight:700;color:#2a2438;background:#fffaf0;border:3px solid var(--ink);border-radius:14px;outline:none;box-shadow:3px 3px 0 var(--sh);transition:transform .15s,box-shadow .15s,background .15s;caret-color:var(--accent)}
+  #pin input:focus{transform:translateY(-3px) rotate(-2deg);box-shadow:3px 6px 0 var(--sh);background:#fff}
+  #pin input.fill{background:#ffe9a8}
+  #pin.shake{animation:shake .4s}
+  @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  #nameInput{width:100%;margin-top:16px;padding:11px 14px;font:inherit;font-size:18px;font-weight:700;text-align:center;color:#2a2438;background:#fffaf0;border:3px solid var(--ink);border-radius:14px;outline:none;box-shadow:3px 3px 0 var(--sh)}
+  #nameInput:focus{background:#fff}
+  #nameKinds{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  #nameKinds .kd{font:inherit;font-size:12px;font-weight:700;color:#2a2438;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 6px;background:#fffaf0;border:2px solid var(--ink);border-radius:12px;cursor:pointer;transition:transform .15s,background .15s}
+  #nameKinds .kd svg{width:38px;height:38px;overflow:visible}
+  #nameKinds .kd:hover{transform:translateY(-2px)}
+  #nameKinds .kd.on{background:#ffe9a8;box-shadow:2px 3px 0 var(--sh);transform:translateY(-2px) rotate(-2deg)}
+  @media (prefers-reduced-motion:reduce){.dpg{animation:none}.dlg.show .letter{animation:none}}
 
   #dropAll{position:fixed;inset:0;display:none;place-items:center;font-size:22px;font-weight:700;z-index:4;pointer-events:none;color:var(--out)}
   body.dragging #dropAll{display:grid;background:rgba(255,255,255,.12)}
@@ -186,7 +212,7 @@
   </div>
   <div class="tools">
     <div class="pill" id="themePill" title="Dag of nacht">🌙</div>
-    <div class="pill" id="roomPill">Koppelcode</div>
+    <div class="pill" id="roomPill">Pincode</div>
   </div>
 </header>
 
@@ -207,14 +233,37 @@
 <div id="dropAll">Laat los boven een huisje, de duif brengt het weg!</div>
 <input type="file" id="pick" multiple>
 
-<div id="codeBox">
-  <div class="card">
-    <div class="t" style="font-size:17px">Koppelen met een code</div>
-    <div class="m" style="opacity:.8;margin-top:4px">Gebruik dezelfde code op beide apparaten als ze elkaar niet vanzelf vinden (bijvoorbeeld via VPN).</div>
-    <input id="codeInput" maxlength="12" placeholder="CODE" autocomplete="off">
-    <div class="row">
-      <button class="ghost" id="codeClear">Zonder code</button>
-      <button id="codeOk">Koppelen</button>
+<div class="dlg" id="codeBox">
+  <div class="letter">
+    <div class="dpg withmail"><div class="pg" data-pg></div></div>
+    <div class="stamp">POST<br>DUIF</div>
+    <h2>Geheime pincode</h2>
+    <p>Geef beide apparaten dezelfde pincode, dan vindt de duif de weg. Handig als ze elkaar niet vanzelf zien (bijvoorbeeld via VPN).</p>
+    <div id="pin">
+      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 1">
+      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 2">
+      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 3">
+      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 4">
+    </div>
+    <div class="msg" id="pinMsg"></div>
+    <div class="btns">
+      <button class="btn ghost" id="codeClear" type="button">Zonder pincode</button>
+      <button class="btn" id="codeOk" type="button">Koppelen</button>
+    </div>
+  </div>
+</div>
+
+<div class="dlg" id="nameBox">
+  <div class="letter">
+    <div class="dpg"><div class="pg" data-pg></div></div>
+    <div class="stamp">POST<br>DUIF</div>
+    <h2>Hoe heet dit huisje?</h2>
+    <p>Zo zien je andere apparaten jou. Bijvoorbeeld Werk-pc of Telefoon.</p>
+    <input id="nameInput" maxlength="30" autocomplete="off" spellcheck="false">
+    <div id="nameKinds"></div>
+    <div class="btns">
+      <button class="btn ghost" id="nameCancel" type="button">Annuleren</button>
+      <button class="btn" id="nameOk" type="button">Klaar!</button>
     </div>
   </div>
 </div>
@@ -329,11 +378,8 @@
   let myId = sessionStorage.getItem('drift-id') || rnd(10);
   sessionStorage.setItem('drift-id', myId);
   let myName = store.get('drift-name');
-  if (!myName) {
-    const def = KIND_NAME[kind];
-    myName = (prompt('Hoe wil je dit apparaat noemen? (bijvoorbeeld Werk-pc of Telefoon)', def) || def).trim().slice(0,30) || def;
-  }
-  store.set('drift-name', myName);
+  let needName = false; // eerste keer: eerst het naamvenster, daarna pas verbinden
+  if (!myName) { myName = KIND_NAME[kind]; needName = true; }
   let room = (store.get('drift-room') || '').toUpperCase();
   const savedKind = store.get('drift-kind');
   if (KINDS.includes(savedKind)) kind = savedKind;
@@ -346,21 +392,73 @@
   }
 
   const today = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
-  const renderMe = () => { $('#meArt').innerHTML = DRAW[kind]; $('#meHouse .hs').innerHTML = houseSVG(meVariant(), WALLS[hsh(myName) % 6], ROOFS[(hsh(myName) >>> 4) % 6]); $('#meDev').dataset.roof = ROOF_AT[meVariant()]; $('#meName').textContent = myName; $('#roomPill').textContent = room ? `Code: ${room}` : 'Koppelcode'; };
+  const renderMe = () => { $('#meArt').innerHTML = DRAW[kind]; $('#meHouse .hs').innerHTML = houseSVG(meVariant(), WALLS[hsh(myName) % 6], ROOFS[(hsh(myName) >>> 4) % 6]); $('#meDev').dataset.roof = ROOF_AT[meVariant()]; $('#meName').textContent = myName; $('#roomPill').textContent = room ? `Pincode: ${room}` : 'Pincode'; };
   renderMe();
-  $('#meName').onclick = () => {
-    const n = prompt('Naam van dit apparaat:', myName);
-    if (n && n.trim()) { myName = n.trim().slice(0,30); store.set('drift-name', myName); renderMe(); connectEvents(); }
+  // ---------- naamvenster ----------
+  document.querySelectorAll('[data-pg]').forEach(e => e.innerHTML = PIGEON);
+  let namePick = kind;
+  const nameBox = $('#nameBox');
+  function openName() {
+    namePick = kind;
+    $('#nameInput').value = needName ? '' : myName;
+    $('#nameInput').placeholder = KIND_NAME[kind];
+    $('#nameKinds').innerHTML = KINDS.map(k => `<button type="button" class="kd${k === namePick ? ' on' : ''}" data-k="${k}">${DRAW[k]}<span>${KIND_NAME[k]}</span></button>`).join('');
+    $('#nameCancel').style.display = needName ? 'none' : '';
+    nameBox.classList.add('show');
+    setTimeout(() => $('#nameInput').focus(), 60);
+  }
+  function closeName() { if (needName) return; nameBox.classList.remove('show'); }
+  $('#nameKinds').onclick = e => {
+    const b = e.target.closest('.kd'); if (!b) return;
+    namePick = b.dataset.k;
+    $('#nameInput').placeholder = KIND_NAME[namePick];
+    document.querySelectorAll('#nameKinds .kd').forEach(x => x.classList.toggle('on', x === b));
   };
+  $('#nameOk').onclick = () => {
+    myName = $('#nameInput').value.trim().slice(0, 30) || KIND_NAME[namePick];
+    store.set('drift-name', myName);
+    if (namePick !== kind || store.get('drift-kind')) { kind = namePick; store.set('drift-kind', kind); }
+    needName = false;
+    nameBox.classList.remove('show');
+    renderMe(); connectEvents();
+  };
+  $('#nameCancel').onclick = closeName;
+  nameBox.onclick = e => { if (e.target === nameBox) closeName(); };
+  nameBox.onkeydown = e => { if (e.key === 'Enter') $('#nameOk').click(); else if (e.key === 'Escape') closeName(); };
+  $('#meName').onclick = openName;
 
   $('#meArt').onclick = () => { kind = KINDS[(KINDS.indexOf(kind) + 1) % KINDS.length]; store.set('drift-kind', kind); renderMe(); connectEvents(); };
 
-  // ---------- koppelcode ----------
-  $('#roomPill').onclick = () => { $('#codeInput').value = room; $('#codeBox').classList.add('show'); $('#codeInput').focus(); };
-  $('#codeBox').onclick = e => { if (e.target.id === 'codeBox') $('#codeBox').classList.remove('show'); };
-  $('#codeOk').onclick = () => { room = $('#codeInput').value.toUpperCase().replace(/[^A-Z0-9]/g,''); store.set('drift-room', room); $('#codeBox').classList.remove('show'); renderMe(); connectEvents(); };
-  $('#codeClear').onclick = () => { room = ''; store.set('drift-room',''); $('#codeBox').classList.remove('show'); renderMe(); connectEvents(); };
-  $('#codeInput').onkeydown = e => { if (e.key === 'Enter') $('#codeOk').click(); };
+  // ---------- pincode ----------
+  const pinEls = [...document.querySelectorAll('#pin input')];
+  const codeBox = $('#codeBox');
+  const pinSync = () => pinEls.forEach(x => x.classList.toggle('fill', !!x.value));
+  const setPin = v => { pinEls.forEach((x, i) => x.value = v[i] || ''); pinSync(); };
+  pinEls.forEach((el, i) => {
+    el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, '').slice(-1); $('#pinMsg').textContent = ''; pinSync(); if (el.value && i < 3) pinEls[i + 1].focus(); });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0) { pinEls[i - 1].value = ''; pinSync(); pinEls[i - 1].focus(); }
+      else if (e.key === 'ArrowLeft' && i > 0) pinEls[i - 1].focus();
+      else if (e.key === 'ArrowRight' && i < 3) pinEls[i + 1].focus();
+      else if (e.key === 'Enter') $('#codeOk').click();
+      else if (e.key === 'Escape') codeBox.classList.remove('show');
+    });
+    el.addEventListener('paste', e => { e.preventDefault(); const t = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4); setPin(t); pinEls[Math.min(t.length, 3)].focus(); });
+    el.addEventListener('focus', () => el.select());
+  });
+  $('#roomPill').onclick = () => { setPin(room.replace(/\D/g, '')); $('#pinMsg').textContent = ''; codeBox.classList.add('show'); setTimeout(() => (pinEls.find(x => !x.value) || pinEls[3]).focus(), 60); };
+  codeBox.onclick = e => { if (e.target === codeBox) codeBox.classList.remove('show'); };
+  $('#codeOk').onclick = () => {
+    const v = pinEls.map(x => x.value).join('');
+    if (v.length < 4) {
+      $('#pinMsg').textContent = 'Vul vier cijfers in';
+      const g = $('#pin'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake');
+      (pinEls.find(x => !x.value) || pinEls[0]).focus();
+      return;
+    }
+    room = v; store.set('drift-room', room); codeBox.classList.remove('show'); renderMe(); connectEvents();
+  };
+  $('#codeClear').onclick = () => { room = ''; store.set('drift-room', ''); codeBox.classList.remove('show'); renderMe(); connectEvents(); };
 
   // ---------- postduiven in de lucht ----------
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -694,7 +792,7 @@
   addEventListener('resize', renderPeers);
 
   renderPeers();
-  connectEvents();
+  if (needName) openName(); else connectEvents();
 })();
 </script>
 </body>
