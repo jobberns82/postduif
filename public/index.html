@@ -149,7 +149,7 @@
   .card button{margin-top:9px;background:var(--accent);color:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
   .card button:active{transform:translateY(1px)}
 
-  /* ---------- briefjes (pincode en apparaatnaam) ---------- */
+  /* ---------- briefjes (koppelcode, apparaatnaam en slot) ---------- */
   .dlg{position:fixed;inset:0;background:rgba(20,16,40,.45);display:none;place-items:center;z-index:40;padding:70px 16px 16px;overflow:auto}
   .dlg.show{display:grid}
   .dlg.show .letter{animation:letterin .45s cubic-bezier(.3,1.5,.5,1) both}
@@ -170,11 +170,27 @@
   .letter .btn.ghost{background:var(--paper2);color:#2a2438}
   .letter .msg{min-height:18px;margin-top:10px;font-size:13px;font-weight:700;color:#c43a26}
   #pin{display:flex;justify-content:center;gap:10px;margin-top:18px}
-  #pin input{width:58px;height:70px;padding:0;text-align:center;font-family:var(--font);font-size:34px;font-weight:700;color:#2a2438;background:#fffaf0;border:3px solid var(--ink);border-radius:14px;outline:none;box-shadow:3px 3px 0 var(--sh);transition:transform .15s,box-shadow .15s,background .15s;caret-color:var(--accent)}
+  #pin input{text-transform:uppercase;width:58px;height:70px;padding:0;text-align:center;font-family:var(--font);font-size:34px;font-weight:700;color:#2a2438;background:#fffaf0;border:3px solid var(--ink);border-radius:14px;outline:none;box-shadow:3px 3px 0 var(--sh);transition:transform .15s,box-shadow .15s,background .15s;caret-color:var(--accent)}
   #pin input:focus{transform:translateY(-3px) rotate(-2deg);box-shadow:3px 6px 0 var(--sh);background:#fff}
   #pin input.fill{background:#ffe9a8}
   #pin.shake{animation:shake .4s}
   @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  body.locked header,body.locked #stage,body.locked #inbox,body.locked #dropAll{display:none}
+  #lock{z-index:50}
+  #lock .letter{width:min(340px,100%);padding-bottom:20px}
+  #lock.bad .dpg{animation:nope .45s}
+  @keyframes nope{20%,60%{transform:translateX(-50%) rotate(-9deg)}40%,80%{transform:translateX(-50%) rotate(9deg)}}
+  #eggs{display:flex;justify-content:center;gap:12px;margin-top:18px;min-height:40px}
+  #eggs.shake{animation:shake .4s}
+  #eggs i{width:28px;height:36px;background:#fffaf0;border:3px solid var(--ink);border-radius:50% 50% 50% 50%/62% 62% 38% 38%;box-shadow:2px 3px 0 var(--sh);transition:background .15s,transform .15s}
+  #eggs i.on{background:#ffd84a;transform:translateY(-4px) scale(1.08)}
+  #keys{display:grid;grid-template-columns:repeat(3,64px);gap:12px;justify-content:center;margin-top:12px}
+  #keys button{width:64px;height:64px;border-radius:50%;border:3px solid var(--ink);background:#fffaf0;color:#2a2438;font-family:var(--font);font-size:26px;font-weight:700;cursor:pointer;box-shadow:3px 3px 0 var(--sh);transition:transform .1s,box-shadow .1s,background .1s;touch-action:manipulation}
+  #keys button:hover{background:#fff;transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--sh)}
+  #keys button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--sh);background:#ffe9a8}
+  #keys button.gap{visibility:hidden}
+  #keys button.del{font-size:22px;background:var(--paper2)}
+  #keys button:disabled{opacity:.5;cursor:default}
   #nameInput{width:100%;margin-top:16px;padding:11px 14px;font:inherit;font-size:18px;font-weight:700;text-align:center;color:#2a2438;background:#fffaf0;border:3px solid var(--ink);border-radius:14px;outline:none;box-shadow:3px 3px 0 var(--sh)}
   #nameInput:focus{background:#fff}
   #nameKinds{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
@@ -190,7 +206,7 @@
   @media (max-width:520px){.nm,.st{width:auto;left:0;transform:none}.st{white-space:normal}.nm span{white-space:normal}.logo small,.orb{display:none}.pill{padding:6px 12px;font-size:13px}.logo .pg{width:44px}.logo b{font-size:21px}header{padding:14px 14px}}
 </style>
 </head>
-<body>
+<body class="locked">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <g id="cl"><rect x="34" y="58" width="140" height="32" rx="16"/><circle cx="62" cy="60" r="24"/><circle cx="98" cy="44" r="32"/><circle cx="136" cy="52" r="28"/><circle cx="160" cy="68" r="20"/></g>
@@ -212,7 +228,8 @@
   </div>
   <div class="tools">
     <div class="pill" id="themePill" title="Dag of nacht">🌙</div>
-    <div class="pill" id="roomPill">Pincode</div>
+    <div class="pill" id="lockPill" style="display:none" title="Op slot zetten">Op slot</div>
+    <div class="pill" id="roomPill">Koppelcode</div>
   </div>
 </header>
 
@@ -237,19 +254,31 @@
   <div class="letter">
     <div class="dpg withmail"><div class="pg" data-pg></div></div>
     <div class="stamp">POST<br>DUIF</div>
-    <h2>Geheime pincode</h2>
-    <p>Geef beide apparaten dezelfde pincode, dan vindt de duif de weg. Handig als ze elkaar niet vanzelf zien (bijvoorbeeld via VPN).</p>
+    <h2>Koppelcode</h2>
+    <p>Geef beide apparaten dezelfde code, dan vindt de duif de weg. Handig als ze elkaar niet vanzelf zien (bijvoorbeeld via VPN).</p>
     <div id="pin">
-      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 1">
-      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 2">
-      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 3">
-      <input inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Cijfer 4">
+      <input maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Cijfer 1">
+      <input maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Cijfer 2">
+      <input maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Cijfer 3">
+      <input maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Cijfer 4">
     </div>
     <div class="msg" id="pinMsg"></div>
     <div class="btns">
-      <button class="btn ghost" id="codeClear" type="button">Zonder pincode</button>
+      <button class="btn ghost" id="codeClear" type="button">Zonder code</button>
       <button class="btn" id="codeOk" type="button">Koppelen</button>
     </div>
+  </div>
+</div>
+
+<div class="dlg" id="lock">
+  <div class="letter">
+    <div class="dpg"><div class="pg" data-pg></div></div>
+    <div class="stamp">POST<br>DUIF</div>
+    <h2>Wie klopt daar?</h2>
+    <p>Toets de pincode in om binnen te komen.</p>
+    <div id="eggs"></div>
+    <div class="msg" id="lockMsg"></div>
+    <div id="keys"></div>
   </div>
 </div>
 
@@ -392,7 +421,7 @@
   }
 
   const today = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
-  const renderMe = () => { $('#meArt').innerHTML = DRAW[kind]; $('#meHouse .hs').innerHTML = houseSVG(meVariant(), WALLS[hsh(myName) % 6], ROOFS[(hsh(myName) >>> 4) % 6]); $('#meDev').dataset.roof = ROOF_AT[meVariant()]; $('#meName').textContent = myName; $('#roomPill').textContent = room ? `Pincode: ${room}` : 'Pincode'; };
+  const renderMe = () => { $('#meArt').innerHTML = DRAW[kind]; $('#meHouse .hs').innerHTML = houseSVG(meVariant(), WALLS[hsh(myName) % 6], ROOFS[(hsh(myName) >>> 4) % 6]); $('#meDev').dataset.roof = ROOF_AT[meVariant()]; $('#meName').textContent = myName; $('#roomPill').textContent = room ? `Code: ${room}` : 'Koppelcode'; };
   renderMe();
   // ---------- naamvenster ----------
   document.querySelectorAll('[data-pg]').forEach(e => e.innerHTML = PIGEON);
@@ -429,13 +458,13 @@
 
   $('#meArt').onclick = () => { kind = KINDS[(KINDS.indexOf(kind) + 1) % KINDS.length]; store.set('drift-kind', kind); renderMe(); connectEvents(); };
 
-  // ---------- pincode ----------
+  // ---------- koppelcode ----------
   const pinEls = [...document.querySelectorAll('#pin input')];
   const codeBox = $('#codeBox');
   const pinSync = () => pinEls.forEach(x => x.classList.toggle('fill', !!x.value));
   const setPin = v => { pinEls.forEach((x, i) => x.value = v[i] || ''); pinSync(); };
   pinEls.forEach((el, i) => {
-    el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, '').slice(-1); $('#pinMsg').textContent = ''; pinSync(); if (el.value && i < 3) pinEls[i + 1].focus(); });
+    el.addEventListener('input', () => { el.value = el.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(-1); $('#pinMsg').textContent = ''; pinSync(); if (el.value && i < 3) pinEls[i + 1].focus(); });
     el.addEventListener('keydown', e => {
       if (e.key === 'Backspace' && !el.value && i > 0) { pinEls[i - 1].value = ''; pinSync(); pinEls[i - 1].focus(); }
       else if (e.key === 'ArrowLeft' && i > 0) pinEls[i - 1].focus();
@@ -443,15 +472,15 @@
       else if (e.key === 'Enter') $('#codeOk').click();
       else if (e.key === 'Escape') codeBox.classList.remove('show');
     });
-    el.addEventListener('paste', e => { e.preventDefault(); const t = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4); setPin(t); pinEls[Math.min(t.length, 3)].focus(); });
+    el.addEventListener('paste', e => { e.preventDefault(); const t = (e.clipboardData.getData('text') || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 4); setPin(t); pinEls[Math.min(t.length, 3)].focus(); });
     el.addEventListener('focus', () => el.select());
   });
-  $('#roomPill').onclick = () => { setPin(room.replace(/\D/g, '')); $('#pinMsg').textContent = ''; codeBox.classList.add('show'); setTimeout(() => (pinEls.find(x => !x.value) || pinEls[3]).focus(), 60); };
+  $('#roomPill').onclick = () => { setPin(room.replace(/[^A-Za-z0-9]/g, '').toUpperCase()); $('#pinMsg').textContent = ''; codeBox.classList.add('show'); setTimeout(() => (pinEls.find(x => !x.value) || pinEls[3]).focus(), 60); };
   codeBox.onclick = e => { if (e.target === codeBox) codeBox.classList.remove('show'); };
   $('#codeOk').onclick = () => {
     const v = pinEls.map(x => x.value).join('');
     if (v.length < 4) {
-      $('#pinMsg').textContent = 'Vul vier cijfers in';
+      $('#pinMsg').textContent = 'Vul vier tekens in';
       const g = $('#pin'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake');
       (pinEls.find(x => !x.value) || pinEls[0]).focus();
       return;
@@ -584,7 +613,7 @@
     es = new EventSource(`/events?id=${myId}&name=${encodeURIComponent(myName)}&kind=${kind}&room=${encodeURIComponent(room)}`);
     es.addEventListener('peers', e => { peers = JSON.parse(e.data); renderPeers(); });
     es.addEventListener('signal', e => onSignal(JSON.parse(e.data)));
-    es.onerror = () => { /* EventSource probeert vanzelf opnieuw */ };
+    es.onerror = () => { if (es && es.readyState === 2) checkAuth().then(ok => { if (!ok) showLock('Je sessie is verlopen. Toets de pincode in.'); }); };
   }
   const post = (to, data) => fetch('/signal', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ from: myId, to, data }) });
 
@@ -792,7 +821,61 @@
   addEventListener('resize', renderPeers);
 
   renderPeers();
-  if (needName) openName(); else connectEvents();
+
+  // ---------- slot (pincode voor de hele app) ----------
+  const lock = $('#lock');
+  let authOn = false, authLen = 4, typed = '', sendBusy = false, lockedUntil = 0;
+  const start = () => { if (needName) openName(); else connectEvents(); };
+  async function checkAuth() {
+    try {
+      const j = await (await fetch('/api/ik', { cache: 'no-store' })).json();
+      authOn = !!j.need; authLen = j.len || 4;
+      $('#lockPill').style.display = authOn ? '' : 'none';
+      return !authOn || !!j.ok;
+    } catch (e) { return true; }
+  }
+  $('#keys').innerHTML = ['1','2','3','4','5','6','7','8','9','','0','⌫'].map(k => k === '' ? '<button type="button" class="gap" tabindex="-1"></button>' : `<button type="button" data-k="${k}"${k === '⌫' ? ' class="del" aria-label="Wissen"' : ''}>${k}</button>`).join('');
+  function eggs() { $('#eggs').innerHTML = Array.from({ length: authLen }, (_, i) => `<i class="${i < typed.length ? 'on' : ''}"></i>`).join(''); }
+  function showLock(msg) {
+    document.body.classList.add('locked');
+    if (es) { es.close(); es = null; }
+    typed = ''; eggs(); $('#lockMsg').textContent = msg || '';
+    lock.classList.add('show');
+  }
+  function unlock() { lock.classList.remove('show'); document.body.classList.remove('locked'); }
+  const mislukt = (msg) => {
+    $('#lockMsg').textContent = msg;
+    const e = $('#eggs'); e.classList.remove('shake'); void e.offsetWidth; e.classList.add('shake');
+    lock.classList.remove('bad'); void lock.offsetWidth; lock.classList.add('bad');
+    typed = ''; setTimeout(eggs, 350);
+  };
+  async function probeer() {
+    sendBusy = true;
+    try {
+      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: typed }) });
+      if (r.ok) { unlock(); start(); return; }
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 429 || (j.wacht && j.wacht > 0)) { const m = Math.ceil((j.wacht || 60) / 60); mislukt(`Te vaak geklopt. Probeer het over ${m} ${m === 1 ? 'minuut' : 'minuten'} opnieuw.`); }
+      else mislukt('Dat is niet de juiste pincode');
+    } catch (e) { mislukt('Geen verbinding met de duiventil'); }
+    sendBusy = false;
+  }
+  function toets(k) {
+    if (sendBusy || !lock.classList.contains('show')) return;
+    $('#lockMsg').textContent = '';
+    if (k === '⌫') typed = typed.slice(0, -1);
+    else if (typed.length < authLen) typed += k;
+    eggs();
+    if (typed.length === authLen) setTimeout(probeer, 180);
+  }
+  $('#keys').onclick = e => { const b = e.target.closest('button[data-k]'); if (b) toets(b.dataset.k); };
+  addEventListener('keydown', e => {
+    if (!lock.classList.contains('show')) return;
+    if (/^\d$/.test(e.key)) toets(e.key); else if (e.key === 'Backspace') toets('⌫');
+  });
+  $('#lockPill').onclick = async () => { try { await fetch('/api/logout', { method: 'POST' }); } catch (e) {} showLock(); };
+
+  checkAuth().then(ok => { if (ok) { unlock(); start(); } else showLock(); });
 })();
 </script>
 </body>
