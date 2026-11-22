@@ -299,13 +299,15 @@
 
 <script>
 (() => {
+  // oude opslagnamen (drift-) overnemen, zodat naam, code en thema blijven staan
+  try { for (const k of ['theme','name','room','kind']) { const o = localStorage.getItem('drift-' + k); if (o !== null && localStorage.getItem('postduif-' + k) === null) localStorage.setItem('postduif-' + k, o); } } catch (e) {}
   // ---------- dag / nacht ----------
   const tpill = document.querySelector('#themePill');
-  let saved = null; try { saved = localStorage.getItem('drift-theme'); } catch (e) {}
+  let saved = null; try { saved = localStorage.getItem('postduif-theme'); } catch (e) {}
   const mq = matchMedia('(prefers-color-scheme: dark)');
   const applyTheme = t => { document.documentElement.dataset.theme = t; tpill.textContent = t === 'night' ? '☀️' : '🌙'; };
   applyTheme(saved || (mq.matches ? 'night' : 'day'));
-  tpill.onclick = () => { const t = document.documentElement.dataset.theme === 'night' ? 'day' : 'night'; applyTheme(t); try { localStorage.setItem('drift-theme', t); } catch (e) {} };
+  tpill.onclick = () => { const t = document.documentElement.dataset.theme === 'night' ? 'day' : 'night'; applyTheme(t); try { localStorage.setItem('postduif-theme', t); } catch (e) {} };
   mq.addEventListener && mq.addEventListener('change', e => { if (!saved) applyTheme(e.matches ? 'night' : 'day'); });
 
   // ---------- tekeningen ----------
@@ -404,19 +406,19 @@
   // ---------- identiteit ----------
   const store = { get:k=>{try{return localStorage.getItem(k)}catch(e){return null}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}} };
   const rnd = n => Array.from(crypto.getRandomValues(new Uint8Array(n)),b=>b.toString(36).padStart(2,'0')).join('').slice(0,n*2-2);
-  let myId = sessionStorage.getItem('drift-id') || rnd(10);
-  sessionStorage.setItem('drift-id', myId);
-  let myName = store.get('drift-name');
+  let myId = sessionStorage.getItem('postduif-id') || rnd(10);
+  sessionStorage.setItem('postduif-id', myId);
+  let myName = store.get('postduif-name');
   let needName = false; // eerste keer: eerst het naamvenster, daarna pas verbinden
   if (!myName) { myName = KIND_NAME[kind]; needName = true; }
-  let room = (store.get('drift-room') || '').toUpperCase();
-  const savedKind = store.get('drift-kind');
+  let room = (store.get('postduif-room') || '').toUpperCase();
+  const savedKind = store.get('postduif-kind');
   if (KINDS.includes(savedKind)) kind = savedKind;
   else if (kind === 'desktop' && navigator.getBattery) {
     // heuristiek: een laptop heeft een accu, een desktop meestal niet
     navigator.getBattery().then(b => {
       const hasBattery = !(b.charging && b.level === 1 && b.chargingTime === 0 && b.dischargingTime === Infinity);
-      if (hasBattery && !store.get('drift-kind') && kind === 'desktop') { kind = 'laptop'; renderMe(); connectEvents(); }
+      if (hasBattery && !store.get('postduif-kind') && kind === 'desktop') { kind = 'laptop'; renderMe(); connectEvents(); }
     }).catch(() => {});
   }
 
@@ -445,8 +447,8 @@
   };
   $('#nameOk').onclick = () => {
     myName = $('#nameInput').value.trim().slice(0, 30) || KIND_NAME[namePick];
-    store.set('drift-name', myName);
-    if (namePick !== kind || store.get('drift-kind')) { kind = namePick; store.set('drift-kind', kind); }
+    store.set('postduif-name', myName);
+    if (namePick !== kind || store.get('postduif-kind')) { kind = namePick; store.set('postduif-kind', kind); }
     needName = false;
     nameBox.classList.remove('show');
     renderMe(); connectEvents();
@@ -456,7 +458,7 @@
   nameBox.onkeydown = e => { if (e.key === 'Enter') $('#nameOk').click(); else if (e.key === 'Escape') closeName(); };
   $('#meName').onclick = openName;
 
-  $('#meArt').onclick = () => { kind = KINDS[(KINDS.indexOf(kind) + 1) % KINDS.length]; store.set('drift-kind', kind); renderMe(); connectEvents(); };
+  $('#meArt').onclick = () => { kind = KINDS[(KINDS.indexOf(kind) + 1) % KINDS.length]; store.set('postduif-kind', kind); renderMe(); connectEvents(); };
 
   // ---------- koppelcode ----------
   const pinEls = [...document.querySelectorAll('#pin input')];
@@ -485,9 +487,9 @@
       (pinEls.find(x => !x.value) || pinEls[0]).focus();
       return;
     }
-    room = v; store.set('drift-room', room); codeBox.classList.remove('show'); renderMe(); connectEvents();
+    room = v; store.set('postduif-room', room); codeBox.classList.remove('show'); renderMe(); connectEvents();
   };
-  $('#codeClear').onclick = () => { room = ''; store.set('drift-room', ''); codeBox.classList.remove('show'); renderMe(); connectEvents(); };
+  $('#codeClear').onclick = () => { room = ''; store.set('postduif-room', ''); codeBox.classList.remove('show'); renderMe(); connectEvents(); };
 
   // ---------- postduiven in de lucht ----------
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -639,7 +641,7 @@
     const c = ex || makeConn(pid);
     c.opening = new Promise(async (res, rej) => {
       const t = setTimeout(() => rej(new Error('Verbinden duurde te lang')), 12000);
-      const dc = c.pc.createDataChannel('drift');
+      const dc = c.pc.createDataChannel('postduif');
       setupDc(pid, c, dc, () => { clearTimeout(t); res(c); });
       const offer = await c.pc.createOffer();
       await c.pc.setLocalDescription(offer);
